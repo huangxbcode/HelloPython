@@ -91,11 +91,28 @@ def test_save_todo_list():
     assert todo.todos == todos_original
     os.unlink("todos.pickle")
     print "ok - save todo list"
-                  
+
+def test_todo_sort_after_order():
+    todo.todos = [{'title':'test unimportant todo',
+                     'description':'a unimportant test',
+                     'level':'Unimportant'},
+                  {'title':'test medium todo',
+                     'description':'a medium test',
+                     'level':'Medium'},
+                  ]
+    todo.create_todo(todo.todos,
+                     title="Make some stuff",
+                     description="Stuff needs to be programmed",
+                     level="Important")
+    assert todo.todos[0]['level'] == "Important"
+    assert todo.todos[1]['level'] == "Medium"
+    assert todo.todos[2]['level'] == "Unimportant"
+    
 test_create_todo()
 test_get_function()
 test_get_fields()
 test_run_command()
 test_show_todos()
 test_todo_sort_order()
-test_save_todo_list()
+#test_save_todo_list()
+test_todo_sort_after_order()

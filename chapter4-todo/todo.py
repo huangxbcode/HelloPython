@@ -6,18 +6,22 @@ todos = []
 
 def main_loop():
     user_input = ""
+    load_todo_list()
     while 1:
         print run_command(user_input)
         user_input = raw_input("> ")
         if user_input.lower().startswith("quit"):
             print "Exiting..."
             break
+    load_todo_list()
         
 def create_todo(todos, title, description, level):
     todo = {'title':title,
             'description':description,
             'level':level,}
     todos.append(todo)
+    sort_todos()
+    return "Created '%s'." %title
 
 def get_input(fields):
     user_input = {}
@@ -78,7 +82,8 @@ def show_todo(todo, index):
         output += "\n"
     return output
 
-def sort_todos(todos):
+def sort_todos():
+    global todos
     important = [capitalize(todo) for todo in todos
                  if todo['level'].lower() == 'important']
     unimportant = [todo for todo in todos
@@ -88,14 +93,12 @@ def sort_todos(todos):
               todo['level'].lower() != 'unimportant'
               ]
     todos = (important + medium + unimportant)
-    return todos
+    #return todos
     
 def show_todos(todos):
     output = ("Item       Title        "
               "Description              Level\n")
-    sorted_todos = sort_todos(todos)
-    
-    for index, todo in enumerate(sorted_todos):
+    for index, todo in enumerate(todos):
         output += show_todo(todo, index)
     return output
 
@@ -110,9 +113,36 @@ def load_todo_list():
         save_file = file("todos.pickle")
         todos = pickle.load(save_file)
 
+def delete_todo(todos, which):
+    if not which.isdigit():
+        return ("'"+which+"' needs to be the digit of a todo!")
+    which = int(which)
+    if which < 1 or which > len(todos):
+        return ("'"+str(which)+"' needs to be the number of a todo size!")
+    del todos[which-1]
+    return "Deleted todo #" + str(which)
+
+def edit_todo(todos, which, title, description, level):
+    if not which.isdigit():
+        return ("'"+which+"' needs to be the digit of a todo!")
+    which = int(which)
+    if which < 1 or which > len(todos):
+        return ("'"+str(which)+"' needs to be the number of a todo size! ")
+    todo = todos[which-1]
+    if title != "":
+        todo['title'] = title
+    if description != "":
+        todo['description'] = description
+    if level != "":
+        todo['level'] = level
+    sort_todos()
+    return "Edited todo#" + str(which)
+
 todos = []
 commands = {'new':[create_todo, ['title','description','level']],
             'show':[show_todos, []],
+            'delete':[delete_todo, ['which']],
+            'edit':[edit_todo, ['which', 'title','description','level']],
             'test':[test,['abcd','ijkl']]}
 
 if __name__ == '__main__':
