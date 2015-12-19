@@ -80,5 +80,21 @@ def test():
         print "\n".join(result)
 
 if __name__ == '__main__':
-    test()
+    import cave
+    caves = cave.create_caves()
+
+    cave1 = caves[0]
+    import item
+    sword = item.Item("sword", "A pointy sword.", cave1)
+    coin = item.Item("coin", "A shiny gold coin. "
+                     "Your first piece of treasure!", cave1)
+
+    player = Player(cave1)
+    print '\n'.join(player.location.look(player, ''))
+    while player.playing:
+        input = player.get_input()
+        result = player.process_input(input)
+        print "\n".join(result)
+
+    
         
