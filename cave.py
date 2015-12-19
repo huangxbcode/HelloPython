@@ -16,6 +16,20 @@ class Cave(object):
     def __repr__(self):
         return "<Cave " + self.name + ">"
 
+    def look(self, player, noun):
+        if noun != "":
+            result = [self.name, self.description]
+            if len(self.here) > 0:
+                result += ["Items here:"]
+                result += [x.name for x in self.here
+                           if 'name' in dir(x)]
+        else:
+            result = [noun + "? I can't see that."]
+        return result
+        
+    actions = ['look']
+
+
 cave_names = ["盘丝洞","游龙洞","水帘洞","蜘蛛洞","泥鳅洞",
               "鳝鱼洞","螃蟹洞","水母洞","黄金洞","水银洞",]
 

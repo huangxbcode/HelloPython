@@ -37,14 +37,11 @@ class Player(object):
         elif verb.lower() in self.location.actions:
            return getattr(self.location, verb)
 
-    def look(self, player, noun):
-           return [self.location.name, self.location.description]
-
     def quit(self, player, noun):
            self.playing = False
            return ["bye bye!"]
 
-    actions = ['look', 'quit']
+    actions = ['quit']
 
 def test():
     import cave
@@ -52,6 +49,12 @@ def test():
         "Empty Cave",
         "A desolate, empty cave, "
         "waiting for someone to fill it.")
+
+    import item
+    sword = item.Item("sword", "A pointy sword.", empty_cave)
+    coin = item.Item("coin", "A shiny gold coin. "
+                     "Your first piece of treasure!", empty_cave)
+    
     player = Player(empty_cave)
 
     print player.location.name
