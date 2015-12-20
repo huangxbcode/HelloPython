@@ -1,100 +1,61 @@
-import shlex
+﻿import random
+import item, player, monster, cave
 
-class Player(object):
-    def __init__(self, location):
-        self.location = location
-        self.location.here.append(self)
-        self.playing = True
-        self.inventory = []
+class Game(object):
+    def __init__(self):
+        self.caves = self.create_caves()
+        cave1 = self.caves[0]
+        sword = item.Item("sword", "A pointy sword.", cave1)
+        coin = item.Item("coin", "A shiny gold coin. "
+                     "Your first piece of treasure!", cave1)
+        orc = monster.Monster(cave1, 'orc', 'A generic dungeon monster')
+        self.player = player.Player(cave1)
 
-    def get_input(self):
-        return raw_input(">")
+    cave_names = ["盘丝洞","游龙洞","水帘洞","蜘蛛洞","泥鳅洞",
+              "鳝鱼洞","螃蟹洞","水母洞","黄金洞","水银洞",]
 
-    def process_input(self, input):
-        parts = shlex.split(input)
-        if len(parts) == 0:
-            return []
-        if len(parts) == 1:
-            parts.append("")
-        verb = parts[0]
-        noun = " ".join(parts[1:])
+    def create_caves(self):
+        random.shuffle(self.cave_names)
+        import cave
+        caves = cave.Cave(self.cave_names[0], self.cave_names[0])
+        for name in self.cave_names[1:]:
+            new_cave = cave.Cave(name, name)
+            print caves
+            eligible_caves = [each_cave for each_cave in caves
+                              if each_cave.can_tunnel_to()]
+            old_cave = random.choice(eligible_caves)
 
-        handler = self.find_handler(verb, noun)
-        if handler is None:
-            return [input +
-                    "? I don't know how to do that!"]
-        return handler(self, noun)
+            directions = [direction for direction, each_cave
+                          in old_cave.tunnels.items()
+                          if cave is None]
+            direction = random.choice(directions)
+            old_cave.tunnel_to(direction, new_cave)
+            caves.append(new_cave)
+        return caves
 
-    def find_handler(self, verb, noun):
-        if noun != "":
-            object = [x for x in self.location.here + self.inventory
-                      if x is not self and
-                      x.name == noun and
-                      verb in x.actions]
-            if len(object) > 0:
-                return getattr(object[0], verb)
-        if verb.lower() in self.actions:
-           return getattr(self, verb)
-        elif verb.lower() in self.location.actions:
-           return getattr(self.location, verb)
+    def do_input(self):
+        get_input_from = [thing for cave in self.caves
+                          for thing in cave.here
+                          if 'get_input' in dir(thing)]
+        for thing in get_input_from:
+            thing.events = []
+            thing.input = thing.get_input()
 
-    def quit(self, player, noun):
-           self.playing = False
-           return ["bye bye!"]
+    def do_update(self):
+        things_to_update = [thing for cave in self.caves
+                          for thing in cave.here
+                          if 'update' in dir(thing)]
+        for thing in things_to_update:
+            thing.update()
 
-    actions = ['quit', 'inv', 'get', 'drop']
-
-    def get(self, player, noun):
-        return [noun + "? I can't see that here."]
-
-    def drop(self, player, noun):
-        return [noun + "? I don't have that!"]
-
-    def inv(self, player, noun):
-        result = ["You have:"]
-        if self.inventory:
-            result += [x.name for x in self.inventory]
-        else:
-            result += ["nothing!"]
-        return result
-
-def test():
-    import cave
-    empty_cave = cave.Cave(
-        "Empty Cave",
-        "A desolate, empty cave, "
-        "waiting for someone to fill it.")
-
-    import item
-    sword = item.Item("sword", "A pointy sword.", empty_cave)
-    coin = item.Item("coin", "A shiny gold coin. "
-                     "Your first piece of treasure!", empty_cave)
-    
-    player = Player(empty_cave)
-
-    print player.location.name
-    print player.location.description
-    while player.playing:
-        input = player.get_input()
-        result = player.process_input(input)
-        print "\n".join(result)
+    def run(self):
+        while self.player.playing:
+            self.do_input()
+            self.do_update()
 
 if __name__ == '__main__':
-    import cave
-    caves = cave.create_caves()
-
-    cave1 = caves[0]
-    import item
-    sword = item.Item("sword", "A pointy sword.", cave1)
-    coin = item.Item("coin", "A shiny gold coin. "
-                     "Your first piece of treasure!", cave1)
-
-    player = Player(cave1)
-    print '\n'.join(player.location.look(player, ''))
-    while player.playing:
-        input = player.get_input()
-        result = player.process_input(input)
-        print "\n".join(result)
+    game = Game()
+    game.run()
 
     
         
