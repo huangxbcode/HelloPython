@@ -47,5 +47,7 @@ class MyClass(Loggable):
         self.log("Some debugging info", logging.DEBUG)
         self.warn("Something bad happend!")
 
-test = MyClass()
-test.do_something()
+if __name__ == '__main__':
+    test = MyClass()
+    test.do_something()
+
